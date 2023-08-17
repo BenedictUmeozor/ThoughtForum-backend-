@@ -2,7 +2,10 @@ import mongoose from "mongoose";
 
 const categorySchema = new mongoose.Schema(
   {
-    title: String,
+    title: {
+      type: String,
+      required: true,
+    },
     questions: [{ type: mongoose.Schema.Types.ObjectId, ref: "Question" }],
   },
   { timestamps: true }
