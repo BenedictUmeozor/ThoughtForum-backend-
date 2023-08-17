@@ -17,13 +17,11 @@ const questionSchema = new mongoose.Schema(
     },
     answers: [{ type: mongoose.Schema.Types.ObjectId }],
     likes: [{ type: mongoose.Schema.Types.ObjectId }],
-    category: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Category",
-        required: true,
-      },
-    ],
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
+    },
   },
   { timestamps: true }
 );
