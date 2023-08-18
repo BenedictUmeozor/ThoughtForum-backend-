@@ -6,6 +6,7 @@ import { NotFound, errorHandler } from "./middleware/error.js";
 import AuthRoutes from "./routes/auth.js";
 import QuestionRoutes from "./routes/question.js";
 import AnswerRoutes from "./routes/answer.js";
+import UserRoutes from "./routes/user.js";
 import { logger } from "./middleware/logger.js";
 
 dotenv.config();
@@ -19,6 +20,7 @@ app.use(logger);
 app.use("/api/auth", AuthRoutes);
 app.use("/api/questions", QuestionRoutes);
 app.use("/api/answers", AnswerRoutes);
+app.use("/api/users", UserRoutes);
 
 app.use(NotFound);
 app.use(errorHandler);
