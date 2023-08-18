@@ -3,6 +3,7 @@ import Category from "../models/category.js";
 import User from "../models/user.js";
 import expressAsyncHandler from "express-async-handler";
 
+// get all questions
 export const getAllQuestions = expressAsyncHandler(async (req, res) => {
   const questions = await Question.find({})
     .populate("user")
@@ -20,6 +21,7 @@ export const getAllQuestions = expressAsyncHandler(async (req, res) => {
   res.status(200).json(formattedQuestions);
 });
 
+// create a question
 export const createQuestion = expressAsyncHandler(async (req, res) => {
   const { title, body, category } = req.body;
 
@@ -52,6 +54,7 @@ export const createQuestion = expressAsyncHandler(async (req, res) => {
   res.status(201).json(formattedQuestions);
 });
 
+// edit a question
 export const editQuestion = expressAsyncHandler(async (req, res) => {
   const { title, body } = req.body;
   const { questionId } = req.params;
