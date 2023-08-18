@@ -5,6 +5,7 @@ import cors from "cors";
 import { NotFound, errorHandler } from "./middleware/error.js";
 import AuthRoutes from "./routes/auth.js";
 import QuestionRoutes from "./routes/question.js";
+import AnswerRoutes from "./routes/answer.js";
 
 dotenv.config();
 const app = express();
@@ -12,8 +13,9 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.use("/api/auth/", AuthRoutes);
+app.use("/api/auth", AuthRoutes);
 app.use("/api/questions", QuestionRoutes);
+app.use("/api/answers", AnswerRoutes);
 
 app.use(NotFound);
 app.use(errorHandler);
