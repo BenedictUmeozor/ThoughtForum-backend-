@@ -93,6 +93,7 @@ export const editQuestion = expressAsyncHandler(async (req, res) => {
   res.status(200).json(formattedQuestions);
 });
 
+// delete question
 export const deleteQuestion = expressAsyncHandler(async (req, res) => {
   const { questionId } = req.params;
 
