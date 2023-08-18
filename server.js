@@ -6,12 +6,15 @@ import { NotFound, errorHandler } from "./middleware/error.js";
 import AuthRoutes from "./routes/auth.js";
 import QuestionRoutes from "./routes/question.js";
 import AnswerRoutes from "./routes/answer.js";
+import { logger } from "./middleware/logger.js";
 
 dotenv.config();
 const app = express();
 
 app.use(express.json());
 app.use(cors());
+
+app.use(logger);
 
 app.use("/api/auth", AuthRoutes);
 app.use("/api/questions", QuestionRoutes);
