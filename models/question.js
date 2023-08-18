@@ -15,8 +15,8 @@ const questionSchema = new mongoose.Schema(
       required: true,
       ref: "User",
     },
-    answers: [{ type: mongoose.Schema.Types.ObjectId }],
-    likes: [{ type: mongoose.Schema.Types.ObjectId }],
+    answers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
