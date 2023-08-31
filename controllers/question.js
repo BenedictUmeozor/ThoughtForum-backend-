@@ -9,7 +9,7 @@ export const getAllQuestions = expressAsyncHandler(async (req, res) => {
     .populate("user")
     .populate("category")
     .sort({ createdAt: -1 });
-
+    
   const formattedQuestions = questions.map((question) => ({
     ...question.toObject(),
     user: {
