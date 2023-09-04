@@ -7,6 +7,7 @@ import {
   getSpecificUser,
   getUser,
   getUserFollowers,
+  getUserFollowing,
 } from "../controllers/user.js";
 
 const router = express.Router();
@@ -14,6 +15,7 @@ const router = express.Router();
 router.get('/followers',VerifyToken, getFollowers)
 router.get("/:userId", getSpecificUser);
 router.get('/followers/:userId', getUserFollowers)
+router.get('/following/:userId', getUserFollowing)
 
 router.use(VerifyToken);
 

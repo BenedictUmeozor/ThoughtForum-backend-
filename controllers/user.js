@@ -95,13 +95,29 @@ export const getUserFollowers = expressAsyncHandler(async (req, res) => {
   const formattedFollowers = followers.map((follower) => ({
     _id: follower._id,
     name: follower.name,
-    bio: follower.bio,
-    gender: follower.gender,
     questions: follower.questions,
     following: follower.following,
     followers: follower.followers,
-    likedQuestions: follower.likedQuestions,
-    likedAnswers: follower.likedAnswers,
+  }));
+
+  res.status(200).json(formattedFollowers);
+});
+
+export const getUserFollowing = expressAsyncHandler(async (req, res) => {
+  const { userId } = req.params;
+
+  const user = await User.findById(userId);
+
+  const followers = await Promise.all(
+    user.following.map((follower) => User.findById(follower))
+  );
+
+  const formattedFollowers = followers.map((follower) => ({
+    _id: follower._id,
+    name: follower.name,
+    questions: follower.questions,
+    following: follower.following,
+    followers: follower.followers,
   }));
 
   res.status(200).json(formattedFollowers);

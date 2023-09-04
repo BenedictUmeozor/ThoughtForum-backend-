@@ -10,7 +10,7 @@ import bcrypt from "bcryptjs";
 dotenv.config();
 
 const generateAccessToken = (_id) => {
-  return jwt.sign({ _id: _id }, process.env.JWT_SECRET, { expiresIn: "15m" });
+  return jwt.sign({ _id: _id }, process.env.JWT_SECRET, { expiresIn: "1m" });
 };
 
 const generateRefreshToken = (_id) => {
@@ -104,14 +104,16 @@ export const refreshToken = expressAsyncHandler(async (req, res) => {
 
   const tokenExists = await RefreshToken.findOne({ token });
 
+  console.log(token);
+
   if (!tokenExists) {
     res.status(401);
-    throw new Error("Invalid token");
+    throw new Error("Token does not exist");
   }
 
   await RefreshToken.findOneAndDelete({ userId: decoded._id });
   const newRefreshToken = await RefreshToken.create({
-    token: generateAccessToken(decoded._id),
+    token: generateRefreshToken(decoded._id),
     userId: decoded._id,
   });
   const newAccessToken = generateAccessToken(decoded._id);
@@ -123,4 +125,16 @@ export const refreshToken = expressAsyncHandler(async (req, res) => {
   };
 
   res.status(201).json(data);
+});
+
+export const logout = expressAsyncHandler(async (req, res) => {
+  const { token } = req.body;
+  const decoded = jwt.verify(token, process.env.JWT_SECRET)
+  const tokenExists = await RefreshToken.findOne({ token });
+  if (!tokenExists) {
+    res.status(401);
+    throw new Error("Token does not exist");
+  }
+  await RefreshToken.findOneAndDelete({ userId: decoded._id });
+  res.status(200).json({message: "Logged out"});
 });
