@@ -7,7 +7,7 @@ export const getAnswers = expressAsyncHandler(async (req, res) => {
   const { questionId } = req.params;
   const answers = await Answer.find({ question: questionId })
     .populate("user")
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: 1 });
 
   const formattedAnswers = answers.map((answer) => ({
     ...answer.toObject(),

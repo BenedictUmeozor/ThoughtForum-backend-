@@ -5,6 +5,7 @@ import {
   followUser,
   getFollowers,
   getSpecificUser,
+  getTopMembers,
   getUser,
   getUserFollowers,
   getUserFollowing,
@@ -12,10 +13,11 @@ import {
 
 const router = express.Router();
 
-router.get('/followers',VerifyToken, getFollowers)
+router.get("/followers", VerifyToken, getFollowers);
+router.get("/top-members", getTopMembers);
 router.get("/:userId", getSpecificUser);
-router.get('/followers/:userId', getUserFollowers)
-router.get('/following/:userId', getUserFollowing)
+router.get("/followers/:userId", getUserFollowers);
+router.get("/following/:userId", getUserFollowing);
 
 router.use(VerifyToken);
 

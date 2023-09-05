@@ -4,6 +4,7 @@ import {
   deleteQuestion,
   editQuestion,
   getAllQuestions,
+  getCategoryQuestions,
   getHotquestions,
   getSingleQuestion,
   likeQuestion,
@@ -13,8 +14,9 @@ import VerifyToken from "../middleware/verifyToken.js";
 const router = express.Router();
 
 router.get("/", getAllQuestions);
-router.get("/:questionId", getSingleQuestion);
 router.get("/hot-questions", getHotquestions);
+router.get("/category/:categoryId", getCategoryQuestions);
+router.get("/:questionId", getSingleQuestion);
 
 router.use(VerifyToken);
 

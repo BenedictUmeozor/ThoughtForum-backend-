@@ -1,6 +1,7 @@
 import Question from "../models/question.js";
 import Category from "../models/category.js";
 import User from "../models/user.js";
+import Answer from "../models/answer.js";
 import expressAsyncHandler from "express-async-handler";
 
 // get all questions
@@ -161,6 +162,10 @@ export const deleteQuestion = expressAsyncHandler(async (req, res) => {
     (question) => question.toString() !== question._id.toString()
   );
 
+  await Answer.deleteMany({
+    _id: { $in: question.answers.map((answer) => answer._id) },
+  });
+
   await questionCategory.save();
   await user.save();
   await Question.findOneAndDelete({ _id: questionId });
@@ -230,6 +235,56 @@ export const likeQuestion = expressAsyncHandler(async (req, res) => {
   res.status(200).json(formattedQuestions);
 });
 
+// get category questions
+
+export const getCategoryQuestions = expressAsyncHandler(
+  expressAsyncHandler(async (req, res) => {
+    const { categoryId } = req.params;
+    const questions = await Question.find({ category: categoryId })
+      .populate("user")
+      .populate("category");
+
+    const formattedQuestions = questions.map((question) => ({
+      ...question.toObject(),
+      user: {
+        _id: question.user._id,
+        name: question.user.name,
+      },
+      category: {
+        _id: question.category._id,
+        title: question.category.title,
+        questions: question.category.questions,
+      },
+    }));
+    res.status(200).json(formattedQuestions);
+  })
+);
+
 // get hot questions
 
-export const getHotquestions = expressAsyncHandler(async (req, res) => {});
+export const getHotquestions = expressAsyncHandler(async (req, res) => {
+  const questions = await Question.find({})
+    .populate("user")
+    .populate("category");
+
+  const formattedQuestions = questions.map((question) => ({
+    ...question.toObject(),
+    user: {
+      _id: question.user._id,
+      name: question.user.name,
+    },
+    category: {
+      _id: question.category._id,
+      title: question.category.title,
+      questions: question.category.questions,
+    },
+  }));
+
+  const hotQuestions = formattedQuestions.sort(
+    (a, b) => b.answers.length - a.answers.length
+  );
+
+  const top3Questions = hotQuestions.slice(0, 3);
+
+  res.status(200).json(top3Questions);
+});

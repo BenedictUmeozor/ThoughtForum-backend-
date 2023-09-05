@@ -32,7 +32,7 @@ export const editUser = expressAsyncHandler(async (req, res) => {
   user.bio = bio;
 
   await user.save();
-  res.status(200).json(user);
+  res.status(200).json({ message: "success" });
 });
 
 export const followUser = expressAsyncHandler(async (req, res) => {
@@ -121,4 +121,21 @@ export const getUserFollowing = expressAsyncHandler(async (req, res) => {
   }));
 
   res.status(200).json(formattedFollowers);
+});
+
+export const getTopMembers = expressAsyncHandler(async (req, res) => {
+  const users = await User.find({});
+  const formattedUsers = users.map((user) => ({
+    _id: user._id,
+    name: user.name,
+    followers: user.followers,
+    questions: user.questions,
+  }));
+  const topMembers = formattedUsers.sort(
+    (a, b) => b.questions.length - a.questions.length
+  );
+
+  const top3Members = topMembers.slice(0, 3);
+
+  res.status(200).json(top3Members);
 });
