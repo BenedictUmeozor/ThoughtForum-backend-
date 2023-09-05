@@ -22,6 +22,10 @@ app.use(
 
 app.use(logger);
 
+app.get("/", (req, res) => {
+  res.send("Welcome to ThoughtForum!");
+});
+
 app.use("/api/auth", AuthRoutes);
 app.use("/api/questions", QuestionRoutes);
 app.use("/api/answers", AnswerRoutes);
