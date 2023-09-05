@@ -13,12 +13,12 @@ import { logger } from "./middleware/logger.js";
 dotenv.config();
 const app = express();
 
-app.use(express.json());
 app.use(
   cors({
     origin: process.env.CLIENT,
   })
 );
+app.use(express.json());
 
 app.use(logger);
 
