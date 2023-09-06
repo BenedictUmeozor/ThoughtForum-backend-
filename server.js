@@ -19,10 +19,11 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(express.static("public"));
 app.use(logger);
 
 app.get("/", (req, res) => {
-  res.send("Welcome to ThoughtForum!");
+  res.sendFile("public/index.html");
 });
 
 app.use("/api/auth", AuthRoutes);
