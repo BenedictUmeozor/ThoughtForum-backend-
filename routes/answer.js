@@ -3,6 +3,7 @@ import {
   createAnswer,
   deleteAnswer,
   editAnswer,
+  getAllAnswers,
   getAnswers,
   likeAnswer,
 } from "../controllers/answer.js";
@@ -10,6 +11,7 @@ import VerifyToken from "../middleware/verifyToken.js";
 
 const router = express.Router();
 
+router.get("/", getAllAnswers);
 router.get("/:questionId", getAnswers);
 
 router.use(VerifyToken);

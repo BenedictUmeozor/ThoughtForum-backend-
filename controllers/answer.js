@@ -3,6 +3,11 @@ import Answer from "../models/answer.js";
 import Question from "../models/question.js";
 import User from "../models/user.js";
 
+export const getAllAnswers = expressAsyncHandler(async (req, res) => {
+  const answersCount = await Answer.find({}).count();
+  res.status(200).json({ "answersCount": answersCount });
+});
+
 export const getAnswers = expressAsyncHandler(async (req, res) => {
   const { questionId } = req.params;
   const answers = await Answer.find({ question: questionId })
