@@ -5,8 +5,10 @@ import {
   editQuestion,
   getAllQuestions,
   getCategoryQuestions,
+  getFollowingQuestions,
   getHotquestions,
   getSingleQuestion,
+  getTopQuestions,
   likeQuestion,
 } from "../controllers/question.js";
 import VerifyToken from "../middleware/verifyToken.js";
@@ -15,6 +17,8 @@ const router = express.Router();
 
 router.get("/", getAllQuestions);
 router.get("/hot-questions", getHotquestions);
+router.get("/top-questions", getTopQuestions);
+router.get("/following-questions", VerifyToken, getFollowingQuestions);
 router.get("/category/:categoryId", getCategoryQuestions);
 router.get("/:questionId", getSingleQuestion);
 

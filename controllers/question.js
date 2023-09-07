@@ -288,3 +288,61 @@ export const getHotquestions = expressAsyncHandler(async (req, res) => {
 
   res.status(200).json(top3Questions);
 });
+
+export const getTopQuestions = expressAsyncHandler(async (req, res) => {
+  const questions = await Question.find({})
+    .populate("user")
+    .populate("category");
+
+  const formattedQuestions = questions.map((question) => ({
+    ...question.toObject(),
+    user: {
+      _id: question.user._id,
+      name: question.user.name,
+    },
+    category: {
+      _id: question.category._id,
+      title: question.category.title,
+      questions: question.category.questions,
+    },
+  }));
+
+  const topQuestions = formattedQuestions.sort(
+    (a, b) => b.answers.length - a.answers.length
+  );
+
+  res.status(200).json(topQuestions);
+});
+
+export const getFollowingQuestions = expressAsyncHandler(async (req, res) => {
+  const user = await User.findOne({ _id: req.user._id });
+  const users = await Promise.all(
+    user.following.map(async (user) => {
+      return await User.findOne({ _id: user._id }).select("questions");
+    })
+  );
+  const flattenedArray = [].concat(...users.map((item) => item.questions));
+
+  const questions = await Promise.all(
+    flattenedArray.map(async (question) => {
+      return await Question.findOne({ _id: question })
+        .populate("user")
+        .populate("category");
+    })
+  );
+
+  const formattedQuestions = questions.map((question) => ({
+    ...question.toObject(),
+    user: {
+      _id: question.user._id,
+      name: question.user.name,
+    },
+    category: {
+      _id: question.category._id,
+      title: question.category.title,
+      questions: question.category.questions,
+    },
+  }));
+
+  res.status(200).json(formattedQuestions);
+});
