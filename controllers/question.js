@@ -346,3 +346,22 @@ export const getFollowingQuestions = expressAsyncHandler(async (req, res) => {
 
   res.status(200).json(formattedQuestions);
 });
+
+export const relatedQuestions = expressAsyncHandler(async (req, res) => {
+  const { categoryId } = req.params;
+  const questions = await Question.find({ category: categoryId })
+    .populate("user")
+    .limit(3)
+    .sort({ createdAt: -1 });
+
+  const formattedQuestions = questions.map((question) => ({
+    _id: question._id,
+    title: question.title,
+    body: question.body,
+    user: {
+      _id: question.user._id,
+      name: question.user.name,
+    },
+  }));
+  res.status(200).json(formattedQuestions);
+});

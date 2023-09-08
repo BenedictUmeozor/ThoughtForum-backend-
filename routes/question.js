@@ -10,6 +10,7 @@ import {
   getSingleQuestion,
   getTopQuestions,
   likeQuestion,
+  relatedQuestions,
 } from "../controllers/question.js";
 import VerifyToken from "../middleware/verifyToken.js";
 
@@ -19,6 +20,7 @@ router.get("/", getAllQuestions);
 router.get("/hot-questions", getHotquestions);
 router.get("/top-questions", getTopQuestions);
 router.get("/following-questions", VerifyToken, getFollowingQuestions);
+router.get("/related-questions/:categoryId", relatedQuestions);
 router.get("/category/:categoryId", getCategoryQuestions);
 router.get("/:questionId", getSingleQuestion);
 
