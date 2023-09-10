@@ -104,8 +104,6 @@ export const refreshToken = expressAsyncHandler(async (req, res) => {
 
   const tokenExists = await RefreshToken.findOne({ token });
 
-  console.log(token);
-
   if (!tokenExists) {
     res.status(401);
     throw new Error("Token does not exist");

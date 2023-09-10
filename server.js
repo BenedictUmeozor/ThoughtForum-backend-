@@ -2,6 +2,8 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
+import { createServer } from "http";
+import { Server } from "socket.io";
 import { NotFound, errorHandler } from "./middleware/error.js";
 import AuthRoutes from "./routes/auth.js";
 import QuestionRoutes from "./routes/question.js";
@@ -20,7 +22,12 @@ app.use(
 );
 app.use(express.json());
 app.use(express.static("public"));
-app.use(logger);
+//app.use(logger);
+
+const server = createServer(app);
+const io = new Server(server, {
+  cors: { origin: process.env.CLIENT },
+});
 
 app.get("/", (req, res) => {
   res.sendFile("public/index.html");
@@ -35,10 +42,63 @@ app.use("/api/categories", CategoryRoutes);
 app.use(NotFound);
 app.use(errorHandler);
 
+let users = [];
+
+io.on("connection", (socket) => {
+  let userId;
+  const socketId = socket.id;
+  console.log(`A user connected ${socketId}`);
+
+  socket.on("login", (data) => {
+    userId = data;
+    users = users.filter((user) => user._id !== data);
+    users.push({ _id: data, socketId });
+    console.log(users);
+  });
+
+  socket.on("logout", (data) => {
+    users = users.filter((user) => user._id !== data);
+    userId = "";
+    console.log(users);
+  });
+
+  socket.on("questionCreated", () => {
+    socket.broadcast.emit("questionCreated");
+  });
+
+  socket.on("answerCreated", () => {
+    socket.broadcast.emit("answerCreated");
+  });
+
+  socket.on("like", (data) => {
+    const user = users.find((user) => user._id === data._id);
+    io.to(user.socketId).emit("like", data.name);
+  });
+
+  socket.on("answer", (data) => {
+    const user = users.find((user) => user._id === data._id);
+    io.to(user.socketId).emit("answer", data.name);
+  });
+
+  socket.on("follow", (data) => {
+    const user = users.find((user) => user._id === data._id);
+    io.to(user.socketId).emit("answer", data.name);
+  });
+
+  socket.on("disconnect", () => {
+    if (userId) {
+      console.log("userId: " + userId);
+      users = users.filter((user) => user._id !== userId);
+      console.log(users);
+      userId = "";
+    }
+  });
+});
+
 mongoose
   .connect(process.env.MONGO_URI)
   .then(
-    app.listen(process.env.PORT, () =>
+    server.listen(process.env.PORT, () =>
       console.log("Connected to DB and listening on port " + process.env.PORT)
     )
   )
