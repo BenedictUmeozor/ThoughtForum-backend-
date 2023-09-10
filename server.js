@@ -82,7 +82,7 @@ io.on("connection", (socket) => {
 
   socket.on("follow", (data) => {
     const user = users.find((user) => user._id === data._id);
-    io.to(user.socketId).emit("answer", data.name);
+    io.to(user.socketId).emit("follow", data.name);
   });
 
   socket.on("disconnect", () => {
