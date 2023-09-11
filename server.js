@@ -59,7 +59,6 @@ io.on("connection", (socket) => {
   socket.on("logout", (data) => {
     users = users.filter((user) => user._id !== data);
     userId = "";
-    console.log(users);
   });
 
   socket.on("questionCreated", () => {
@@ -72,24 +71,28 @@ io.on("connection", (socket) => {
 
   socket.on("like", (data) => {
     const user = users.find((user) => user._id === data._id);
-    io.to(user.socketId).emit("like", data.name);
+    if (user) {
+      io.to(user.socketId).emit("like", data.name);
+    }
   });
 
   socket.on("answer", (data) => {
     const user = users.find((user) => user._id === data._id);
-    io.to(user.socketId).emit("answer", data.name);
+    if (user) {
+      io.to(user.socketId).emit("answer", data.name);
+    }
   });
 
   socket.on("follow", (data) => {
     const user = users.find((user) => user._id === data._id);
-    io.to(user.socketId).emit("follow", data.name);
+    if (user) {
+      io.to(user.socketId).emit("follow", data.name);
+    }
   });
 
   socket.on("disconnect", () => {
     if (userId) {
-      console.log("userId: " + userId);
       users = users.filter((user) => user._id !== userId);
-      console.log(users);
       userId = "";
     }
   });
