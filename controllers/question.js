@@ -242,7 +242,8 @@ export const getCategoryQuestions = expressAsyncHandler(
     const { categoryId } = req.params;
     const questions = await Question.find({ category: categoryId })
       .populate("user")
-      .populate("category");
+      .populate("category")
+      .sort({ createdAt: -1 });
 
     const formattedQuestions = questions.map((question) => ({
       ...question.toObject(),
