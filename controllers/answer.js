@@ -5,7 +5,7 @@ import User from "../models/user.js";
 
 export const getAllAnswers = expressAsyncHandler(async (req, res) => {
   const answersCount = await Answer.find({}).count();
-  res.status(200).json({ "answersCount": answersCount });
+  res.status(200).json({ answersCount: answersCount });
 });
 
 export const getAnswers = expressAsyncHandler(async (req, res) => {
@@ -135,4 +135,24 @@ export const likeAnswer = expressAsyncHandler(async (req, res) => {
   await user.save();
 
   res.status(200).json({ message: "sucessful" });
+});
+
+export const getUsersWhoLiked = expressAsyncHandler(async (req, res) => {
+  const { answerId } = req.params;
+
+  const answer = await Answer.findOne({ _id: answerId });
+
+  const users = await Promise.all(
+    answer.likes.map((user) => User.findById(user))
+  );
+
+  const formattedUsers = users.map((user) => ({
+    _id: user._id,
+    name: user.name,
+    questions: user.questions,
+    following: user.following,
+    followers: user.followers,
+  }));
+
+  res.status(200).json(formattedUsers);
 });

@@ -366,3 +366,23 @@ export const relatedQuestions = expressAsyncHandler(async (req, res) => {
   }));
   res.status(200).json(formattedQuestions);
 });
+
+export const getUsersWhoLiked = expressAsyncHandler(async (req, res) => {
+  const { questionId } = req.params;
+
+  const question = await Question.findOne({ _id: questionId });
+
+  const users = await Promise.all(
+    question.likes.map((user) => User.findById(user))
+  );
+
+  const formattedUsers = users.map((user) => ({
+    _id: user._id,
+    name: user.name,
+    questions: user.questions,
+    following: user.following,
+    followers: user.followers,
+  }));
+
+  res.status(200).json(formattedUsers);
+});

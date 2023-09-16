@@ -5,6 +5,7 @@ import {
   editAnswer,
   getAllAnswers,
   getAnswers,
+  getUsersWhoLiked,
   likeAnswer,
 } from "../controllers/answer.js";
 import VerifyToken from "../middleware/verifyToken.js";
@@ -13,6 +14,7 @@ const router = express.Router();
 
 router.get("/", getAllAnswers);
 router.get("/:questionId", getAnswers);
+router.get("/likes/:answerId", getUsersWhoLiked);
 
 router.use(VerifyToken);
 
