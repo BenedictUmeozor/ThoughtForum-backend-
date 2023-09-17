@@ -1,6 +1,7 @@
 import express from "express";
 import {
   createQuestion,
+  deleteProfileQuestion,
   deleteQuestion,
   editQuestion,
   getAllQuestions,
@@ -21,7 +22,7 @@ router.get("/", getAllQuestions);
 router.get("/hot-questions", getHotquestions);
 router.get("/top-questions", getTopQuestions);
 router.get("/following-questions", VerifyToken, getFollowingQuestions);
-router.get("/likes/:questionId", getUsersWhoLiked)
+router.get("/likes/:questionId", getUsersWhoLiked);
 router.get("/related-questions/:categoryId", relatedQuestions);
 router.get("/category/:categoryId", getCategoryQuestions);
 router.get("/:questionId", getSingleQuestion);
@@ -30,6 +31,7 @@ router.use(VerifyToken);
 
 router.post("/", createQuestion);
 router.put("/:questionId", editQuestion);
+router.delete("/profile/:questionId", deleteProfileQuestion);
 router.delete("/:questionId", deleteQuestion);
 router.post("/like/:questionId", likeQuestion);
 

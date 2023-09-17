@@ -22,7 +22,7 @@ app.use(
 );
 app.use(express.json());
 app.use(express.static("public"));
-//app.use(logger);
+app.use(logger);
 
 const server = createServer(app);
 const io = new Server(server, {
@@ -47,7 +47,6 @@ let users = [];
 io.on("connection", (socket) => {
   let userId;
   const socketId = socket.id;
-  console.log(`A user connected ${socketId}`);
 
   socket.on("login", (data) => {
     userId = data;

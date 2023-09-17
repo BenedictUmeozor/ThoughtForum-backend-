@@ -4,14 +4,8 @@ import User from "../models/user.js";
 import Answer from "../models/answer.js";
 import expressAsyncHandler from "express-async-handler";
 
-// get all questions
-export const getAllQuestions = expressAsyncHandler(async (req, res) => {
-  const questions = await Question.find({})
-    .populate("user")
-    .populate("category")
-    .sort({ createdAt: -1 });
-
-  const formattedQuestions = questions.map((question) => ({
+const formatQuestions = (questions) => {
+  const formatted = questions.map((question) => ({
     ...question.toObject(),
     user: {
       _id: question.user._id,
@@ -23,6 +17,17 @@ export const getAllQuestions = expressAsyncHandler(async (req, res) => {
       questions: question.category.questions,
     },
   }));
+  return formatted;
+};
+
+// get all questions
+export const getAllQuestions = expressAsyncHandler(async (req, res) => {
+  const questions = await Question.find({})
+    .populate("user")
+    .populate("category")
+    .sort({ createdAt: -1 });
+
+  const formattedQuestions = formatQuestions(questions);
 
   res.status(200).json(formattedQuestions);
 });
@@ -83,18 +88,7 @@ export const createQuestion = expressAsyncHandler(async (req, res) => {
     .populate("category")
     .sort({ createdAt: -1 });
 
-  const formattedQuestions = questions.map((question) => ({
-    ...question.toObject(),
-    user: {
-      _id: question.user._id,
-      name: question.user.name,
-    },
-    category: {
-      _id: question.category._id,
-      title: question.category.title,
-      questions: question.category.questions,
-    },
-  }));
+  const formattedQuestions = formatQuestions(questions);
   res.status(201).json(formattedQuestions);
 });
 
@@ -128,18 +122,7 @@ export const editQuestion = expressAsyncHandler(async (req, res) => {
     .populate("category")
     .sort({ createdAt: -1 });
 
-  const formattedQuestions = questions.map((question) => ({
-    ...question.toObject(),
-    user: {
-      _id: question.user._id,
-      name: question.user.name,
-    },
-    category: {
-      _id: question.category._id,
-      title: question.category.title,
-      questions: question.category.questions,
-    },
-  }));
+  const formattedQuestions = formatQuestions(questions);
   res.status(200).json(formattedQuestions);
 });
 
@@ -147,47 +130,64 @@ export const editQuestion = expressAsyncHandler(async (req, res) => {
 export const deleteQuestion = expressAsyncHandler(async (req, res) => {
   const { questionId } = req.params;
 
-  const question = await Question.findOne({ _id: questionId });
-  if (!question) {
+  const deletedQuestion = await Question.findOneAndDelete({ _id: questionId });
+  if (!deletedQuestion) {
     throw new Error("Question not found");
   }
 
-  const questionCategory = await Category.findOne({ _id: question.category });
+  const questionCategory = await Category.findOne({
+    _id: deletedQuestion.category,
+  });
   questionCategory.questions = questionCategory.questions.filter(
-    (question) => question.toString() !== question._id.toString()
+    (q) => q.toString() !== deletedQuestion._id.toString()
   );
 
   const user = await User.findOne({ _id: req.user._id });
   user.questions = user.questions.filter(
-    (question) => question.toString() !== question._id.toString()
+    (q) => q.toString() !== deletedQuestion._id.toString()
   );
 
   await Answer.deleteMany({
-    _id: { $in: question.answers.map((answer) => answer._id) },
+    _id: { $in: deletedQuestion.answers.map((answer) => answer._id) },
   });
 
-  await questionCategory.save();
-  await user.save();
-  await Question.findOneAndDelete({ _id: questionId });
+  await Promise.all([questionCategory.save(), user.save()]);
 
   const questions = await Question.find({})
     .populate("user")
     .populate("category")
     .sort({ createdAt: -1 });
 
-  const formattedQuestions = questions.map((question) => ({
-    ...question.toObject(),
-    user: {
-      _id: question.user._id,
-      name: question.user.name,
-    },
-    category: {
-      _id: question.category._id,
-      title: question.category.title,
-      questions: question.category.questions,
-    },
-  }));
+  const formattedQuestions = formatQuestions(questions);
   res.status(200).json(formattedQuestions);
+});
+
+export const deleteProfileQuestion = expressAsyncHandler(async (req, res) => {
+  const { questionId } = req.params;
+
+  const deletedQuestion = await Question.findOneAndDelete({ _id: questionId });
+  if (!deletedQuestion) {
+    throw new Error("Question not found");
+  }
+
+  const questionCategory = await Category.findOne({
+    _id: deletedQuestion.category,
+  });
+  questionCategory.questions = questionCategory.questions.filter(
+    (q) => q.toString() !== deletedQuestion._id.toString()
+  );
+
+  const user = await User.findOne({ _id: req.user._id });
+  user.questions = user.questions.filter(
+    (q) => q.toString() !== deletedQuestion._id.toString()
+  );
+
+  await Answer.deleteMany({
+    _id: { $in: deletedQuestion.answers.map((answer) => answer._id) },
+  });
+
+  await Promise.all([questionCategory.save(), user.save()]);
+  res.status(200).json({ message: "Deleted successfully" });
 });
 
 // Like a question
@@ -220,18 +220,7 @@ export const likeQuestion = expressAsyncHandler(async (req, res) => {
     .populate("category")
     .sort({ createdAt: -1 });
 
-  const formattedQuestions = questions.map((question) => ({
-    ...question.toObject(),
-    user: {
-      _id: question.user._id,
-      name: question.user.name,
-    },
-    category: {
-      _id: question.category._id,
-      title: question.category.title,
-      questions: question.category.questions,
-    },
-  }));
+  const formattedQuestions = formatQuestions(questions);
   res.status(200).json(formattedQuestions);
 });
 
@@ -245,18 +234,7 @@ export const getCategoryQuestions = expressAsyncHandler(
       .populate("category")
       .sort({ createdAt: -1 });
 
-    const formattedQuestions = questions.map((question) => ({
-      ...question.toObject(),
-      user: {
-        _id: question.user._id,
-        name: question.user.name,
-      },
-      category: {
-        _id: question.category._id,
-        title: question.category.title,
-        questions: question.category.questions,
-      },
-    }));
+    const formattedQuestions = formatQuestions(questions);
     res.status(200).json(formattedQuestions);
   })
 );
@@ -268,18 +246,7 @@ export const getHotquestions = expressAsyncHandler(async (req, res) => {
     .populate("user")
     .populate("category");
 
-  const formattedQuestions = questions.map((question) => ({
-    ...question.toObject(),
-    user: {
-      _id: question.user._id,
-      name: question.user.name,
-    },
-    category: {
-      _id: question.category._id,
-      title: question.category.title,
-      questions: question.category.questions,
-    },
-  }));
+  const formattedQuestions = formatQuestions(questions);
 
   const hotQuestions = formattedQuestions.sort(
     (a, b) => b.answers.length - a.answers.length
@@ -295,18 +262,7 @@ export const getTopQuestions = expressAsyncHandler(async (req, res) => {
     .populate("user")
     .populate("category");
 
-  const formattedQuestions = questions.map((question) => ({
-    ...question.toObject(),
-    user: {
-      _id: question.user._id,
-      name: question.user.name,
-    },
-    category: {
-      _id: question.category._id,
-      title: question.category.title,
-      questions: question.category.questions,
-    },
-  }));
+  const formattedQuestions = formatQuestions(questions);
 
   const topQuestions = formattedQuestions.sort(
     (a, b) => b.answers.length - a.answers.length
@@ -332,18 +288,7 @@ export const getFollowingQuestions = expressAsyncHandler(async (req, res) => {
     })
   );
 
-  const formattedQuestions = questions.map((question) => ({
-    ...question.toObject(),
-    user: {
-      _id: question.user._id,
-      name: question.user.name,
-    },
-    category: {
-      _id: question.category._id,
-      title: question.category.title,
-      questions: question.category.questions,
-    },
-  }));
+  const formattedQuestions = formatQuestions(questions);
 
   res.status(200).json(formattedQuestions);
 });
@@ -355,15 +300,7 @@ export const relatedQuestions = expressAsyncHandler(async (req, res) => {
     .limit(3)
     .sort({ createdAt: -1 });
 
-  const formattedQuestions = questions.map((question) => ({
-    _id: question._id,
-    title: question.title,
-    body: question.body,
-    user: {
-      _id: question.user._id,
-      name: question.user.name,
-    },
-  }));
+  const formattedQuestions = formatQuestions(questions);
   res.status(200).json(formattedQuestions);
 });
 

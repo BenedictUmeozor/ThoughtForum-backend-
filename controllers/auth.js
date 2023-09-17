@@ -23,25 +23,18 @@ export const login = expressAsyncHandler(async (req, res) => {
     throw new Error("All fields are required");
   }
   const user = await User.findOne({ email });
-  if (!user) {
-    throw new Error("Invalid email or password");
-  }
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
+
+  if (!user || !isMatch) {
     throw new Error("Invalid email or password");
-  }
-
-  const hasToken = await RefreshToken.findOne({ userId: user._id });
-
-  if (hasToken) {
-    await RefreshToken.findOneAndDelete({ userId: user._id });
   }
 
   const accessToken = generateAccessToken(user._id);
-  const refreshToken = await RefreshToken.create({
-    token: generateRefreshToken(user._id),
-    userId: user._id,
-  });
+  const refreshToken = await RefreshToken.findOneAndUpdate(
+    { userId: user._id },
+    { token: generateRefreshToken(user._id) },
+    { new: true, upsert: true }
+  );
   const data = {
     _id: user._id,
     accessToken,
@@ -95,6 +88,13 @@ export const signup = expressAsyncHandler(async (req, res) => {
 
 export const refreshToken = expressAsyncHandler(async (req, res) => {
   const { token } = req.body;
+
+  const tokenExists = await RefreshToken.exists({ token });
+
+  if (!tokenExists) {
+    res.status(401);
+    throw new Error("Token does not exist");
+  }
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
   if (!decoded) {
@@ -102,18 +102,11 @@ export const refreshToken = expressAsyncHandler(async (req, res) => {
     throw new Error("Unauthorized");
   }
 
-  const tokenExists = await RefreshToken.findOne({ token });
-
-  if (!tokenExists) {
-    res.status(401);
-    throw new Error("Token does not exist");
-  }
-
-  await RefreshToken.findOneAndDelete({ userId: decoded._id });
-  const newRefreshToken = await RefreshToken.create({
-    token: generateRefreshToken(decoded._id),
-    userId: decoded._id,
-  });
+  const newRefreshToken = await RefreshToken.findOneAndUpdate(
+    { userId: decoded._id },
+    { token: generateRefreshToken(decoded._id) },
+    { new: true }
+  );
   const newAccessToken = generateAccessToken(decoded._id);
 
   const data = {
@@ -127,12 +120,12 @@ export const refreshToken = expressAsyncHandler(async (req, res) => {
 
 export const logout = expressAsyncHandler(async (req, res) => {
   const { token } = req.body;
-  const decoded = jwt.verify(token, process.env.JWT_SECRET)
-  const tokenExists = await RefreshToken.findOne({ token });
+  const tokenExists = await RefreshToken.exists({ token });
   if (!tokenExists) {
     res.status(401);
     throw new Error("Token does not exist");
   }
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
   await RefreshToken.findOneAndDelete({ userId: decoded._id });
-  res.status(200).json({message: "Logged out"});
+  res.status(200).json({ message: "Logged out" });
 });
