@@ -120,7 +120,12 @@ export const refreshToken = expressAsyncHandler(async (req, res) => {
 
 export const logout = expressAsyncHandler(async (req, res) => {
   const { token } = req.body;
-  const tokenExists = await RefreshToken.exists({ token });
+  if (!token) {
+    console.log("No token provided");
+  }
+
+  const tokenExists = await RefreshToken.exists({ token: token });
+
   if (!tokenExists) {
     res.status(401);
     throw new Error("Token does not exist");
