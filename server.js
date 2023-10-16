@@ -17,7 +17,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.CLIENT,
+    origin: [process.env.CLIENT, process.env.CLIENT2],
   })
 );
 app.use(express.json());
@@ -26,7 +26,7 @@ app.use(logger);
 
 const server = createServer(app);
 const io = new Server(server, {
-  cors: { origin: process.env.CLIENT },
+  cors: { origin: [process.env.CLIENT, process.env.CLIENT2] },
 });
 
 app.get("/", (req, res) => {
