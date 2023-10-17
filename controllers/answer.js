@@ -102,7 +102,7 @@ export const deleteAnswer = expressAsyncHandler(async (req, res) => {
   }
 
   question.answers = question.answers.filter(
-    (answer) => answer.toString() !== answer._id.toString()
+    (ans) => ans.toString() !== answer._id.toString()
   );
   await Answer.findOneAndDelete({ _id: answerId });
   await question.save();
