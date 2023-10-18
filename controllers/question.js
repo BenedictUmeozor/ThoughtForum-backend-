@@ -10,6 +10,7 @@ const formatQuestions = (questions) => {
     user: {
       _id: question.user._id,
       name: question.user.name,
+      followers: question.user.followers,
     },
     category: {
       _id: question.category._id,
