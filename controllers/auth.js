@@ -10,7 +10,7 @@ import bcrypt from "bcryptjs";
 dotenv.config();
 
 const generateAccessToken = (_id) => {
-  return jwt.sign({ _id: _id }, process.env.JWT_SECRET, { expiresIn: "1m" });
+  return jwt.sign({ _id: _id }, process.env.JWT_SECRET, { expiresIn: "15m" });
 };
 
 const generateRefreshToken = (_id) => {
@@ -120,9 +120,6 @@ export const refreshToken = expressAsyncHandler(async (req, res) => {
 
 export const logout = expressAsyncHandler(async (req, res) => {
   const { token } = req.body;
-  if (!token) {
-    console.log("No token provided");
-  }
 
   const tokenExists = await RefreshToken.exists({ token: token });
 
