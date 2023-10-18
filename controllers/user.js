@@ -86,23 +86,36 @@ export const getFollowers = expressAsyncHandler(async (req, res) => {
 export const getUserFollowers = expressAsyncHandler(async (req, res) => {
   const { userId } = req.params;
 
-  const user = await User.findById(userId);
+  try {
+    const user = await User.findById(userId);
 
-  const followers = await Promise.all(
-    user.followers.map((follower) => User.findById(follower))
-  );
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
 
-  const formattedFollowers = followers.map((follower) => ({
-    _id: follower._id,
-    name: follower.name,
-    questions: follower.questions,
-    following: follower.following,
-    followers: follower.followers,
-  }));
+    const followers = await Promise.all(
+      user.followers.map(async (follower) => {
+        const foundFollower = await User.findById(follower);
+        return foundFollower || null;
+      })
+    );
 
-  res.status(200).json(formattedFollowers);
+    const formattedFollowers = followers
+      .filter((follower) => follower !== null)
+      .map((follower) => ({
+        _id: follower._id,
+        name: follower.name,
+        questions: follower.questions,
+        following: follower.following,
+        followers: follower.followers,
+      }));
+
+    res.status(200).json(formattedFollowers);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
 });
-
 export const getUserFollowing = expressAsyncHandler(async (req, res) => {
   const { userId } = req.params;
 
