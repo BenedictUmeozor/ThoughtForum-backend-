@@ -70,21 +70,22 @@ io.on("connection", (socket) => {
 
   socket.on("like", (data) => {
     const user = users.find((user) => user._id === data._id);
-    if (user && data.name) {
+    if (user) {
+      console.log("Received like event with data:", data);
       io.to(user.socketId).emit("like", data.name);
     }
   });
 
   socket.on("answer", (data) => {
     const user = users.find((user) => user._id === data._id);
-    if (user && data.name) {
+    if (user) {
       io.to(user.socketId).emit("answer", data.name);
     }
   });
 
   socket.on("follow", (data) => {
     const user = users.find((user) => user._id === data._id);
-    if (user && data.name) {
+    if (user) {
       io.to(user.socketId).emit("follow", data.name);
     }
   });
